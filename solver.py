@@ -1,0 +1,1 @@
+#here the equations will be discritized
