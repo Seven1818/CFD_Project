@@ -9,12 +9,14 @@ from velocity import velocity,diffusivity,grid
 def advection_upwind (C,U,V,dx,dy):
     Nx = 100
     Ny = 100
+    dx = 1/(Nx-1)
+    dy = 1/ (Ny-1)
     #Nx,Ny = C.shape #define grid size, gets it from the size of the input C1/C2
     dCdx = np.zeros_like(C) #derivative in x
     dCdy = np.zeros_like(C) #derivative in y
     #start discretization, go inside the matrix
-    for i in range(1, Nx-2): #goes inside the x coordinate
-        for j in range(1, Ny-2): #goes inside the y coordinate
+    for i in range(0, Nx-1): #goes inside the x coordinate
+        for j in range(0, Ny-1): #goes inside the y coordinate
             # Upwind differencing for x-direction
             if U[i, j] > 0: #case that U is >0 --> backward difference
                 dCdx[i, j] = (C[i, j] - C[i - 1, j]) / dx
@@ -33,11 +35,14 @@ def harmonic_avg(a, b): #Defines harmonic average
     return 2 * a * b / (a + b + 1e-12)  # definition of harmonic average, plus it avoids a division by zero by adding the +1e-12
 
 def diffusion_flux(C, K, dx, dy):
-    Nx,Ny = C.shape
+    Nx = 100
+    Ny = 100
+    dx = 1 / (Nx - 1)
+    dy = 1 / (Ny - 1)
     diff_flux = np.zeros_like(C) #flux of diffusion, same size as C
 
-    for i in range(1, Nx-2): #enter the matrix
-        for j in range(1, Ny-2): #enter the matrix
+    for i in range(0, Nx-1): #enter the matrix
+        for j in range(0, Ny-1): #enter the matrix
             # Diffusion in x-direction
             Ke = harmonic_avg(K[i, j], K[i + 1, j]) #calculates the harmonic average of the diffusivity east
             Kw = harmonic_avg(K[i, j], K[i - 1, j]) #calculates the harmonic average of the diffusivity west
@@ -55,8 +60,6 @@ def diffusion_flux(C, K, dx, dy):
 Nx= 100
 Ny = 100
 X,Y,x,y = grid(Nx, Ny)
-dx = 1.0 / (Nx - 1)
-dy = (0.5 - (-0.5)) / (Ny - 1)
 #Getting U,V and K values
 U,V,e = velocity(X,Y)
 K = diffusivity(X,Y)
@@ -74,11 +77,11 @@ Ar = 0
 # Time loop
 for t in range(timestep):
     # 1. Compute fluxes (advection, diffusion, and reaction)
-    adv_flux_C1 = advection_upwind(C1, U, V, dx, dy) #Calculate advection C1
-    adv_flux_C2 = advection_upwind(C2, U, V,dx,dy) #Calculate advection C2
+    adv_flux_C1 = advection_upwind(C1, U, V, Nx, Ny) #Calculate advection C1
+    adv_flux_C2 = advection_upwind(C2, U, V,Nx,Ny) #Calculate advection C2
 
-    diff_flux_C1 = diffusion_flux(C1, K,dx, dy) #calculate diffusion C1
-    diff_flux_C2 = diffusion_flux(C2, K, dx, dy) #calculate diffusion C2
+    diff_flux_C1 = diffusion_flux(C1, K,Nx, Ny) #calculate diffusion C1
+    diff_flux_C2 = diffusion_flux(C2, K, Nx, Ny) #calculate diffusion C2
 
     reaction_C1 = Ar * C1 * C2 #calculate the reaction (relevant only if Ar=!0)
     reaction_C2 = Ar * C1 * C2 #calculate the reaction
