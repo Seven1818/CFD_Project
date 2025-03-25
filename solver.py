@@ -1,17 +1,20 @@
 #here the equations will be discretized
 import numpy as np
+import matplotlib.pyplot as plt
 from velocity import velocity,diffusivity,grid
 
 #Define functions to discretize the main equations
 #Upwind discretization for advection terms
 
 def advection_upwind (C,U,V,dx,dy):
-    Nx,Ny = C.shape #define grid size, gets it from the size of the input C1/C2
+    Nx = 100
+    Ny = 100
+    #Nx,Ny = C.shape #define grid size, gets it from the size of the input C1/C2
     dCdx = np.zeros_like(C) #derivative in x
     dCdy = np.zeros_like(C) #derivative in y
     #start discretization, go inside the matrix
-    for i in range(1, Nx - 1): #goes inside the x coordinate
-        for j in range(1, Ny - 1): #goes inside the y coordinate
+    for i in range(1, Nx-2): #goes inside the x coordinate
+        for j in range(1, Ny-2): #goes inside the y coordinate
             # Upwind differencing for x-direction
             if U[i, j] > 0: #case that U is >0 --> backward difference
                 dCdx[i, j] = (C[i, j] - C[i - 1, j]) / dx
@@ -20,21 +23,21 @@ def advection_upwind (C,U,V,dx,dy):
 
             # Upwind differencing for y-direction
             if V[i, j] > 0: #case that V is >0 --> backward difference
-                dCdy[i, j] = (C[i, j] - C[i, j - 1]) / dy
+                dCdy[i, j] = (C[i, j] - C[i, j - 1]) / dy #I think the mistake is from how I defined dy
             else: #case that V is <=0 --> forward difference
                 dCdy[i, j] = (C[i, j + 1] - C[i, j]) / dy
 
-        return dCdx, dCdy
+    return dCdx, dCdy
 
 def harmonic_avg(a, b): #Defines harmonic average
     return 2 * a * b / (a + b + 1e-12)  # definition of harmonic average, plus it avoids a division by zero by adding the +1e-12
 
 def diffusion_flux(C, K, dx, dy):
-    Nx, Ny = C.shape
+    Nx,Ny = C.shape
     diff_flux = np.zeros_like(C) #flux of diffusion, same size as C
 
-    for i in range(1, Nx-1): #enter the matrix
-        for j in range(1, Ny-1): #enter the matrix
+    for i in range(1, Nx-2): #enter the matrix
+        for j in range(1, Ny-2): #enter the matrix
             # Diffusion in x-direction
             Ke = harmonic_avg(K[i, j], K[i + 1, j]) #calculates the harmonic average of the diffusivity east
             Kw = harmonic_avg(K[i, j], K[i - 1, j]) #calculates the harmonic average of the diffusivity west
@@ -49,15 +52,19 @@ def diffusion_flux(C, K, dx, dy):
 
 #Create Grid
 #define grid size
-Nx,Ny = 100
+Nx= 100
+Ny = 100
 X,Y,x,y = grid(Nx, Ny)
+dx = 1.0 / (Nx - 1)
+dy = (0.5 - (-0.5)) / (Ny - 1)
 #Getting U,V and K values
 U,V,e = velocity(X,Y)
 K = diffusivity(X,Y)
 
 #initialize C1 and C2 fields
-C1 = np.zeros(Nx,Ny)
-C2 = np.zeros (Nx,Ny)
+C1 = np.zeros((Nx, Ny))  # Correct
+C2 = np.zeros((Nx, Ny))  # Correct
+
 
 #Euler foward to calculate the time derivative
 dt = 0.01
@@ -67,11 +74,11 @@ Ar = 0
 # Time loop
 for t in range(timestep):
     # 1. Compute fluxes (advection, diffusion, and reaction)
-    adv_flux_C1 = advection_upwind(C1, U, V, Nx, Ny) #Calculate advection C1
-    adv_flux_C2 = advection_upwind(C2, U, V, Nx, Ny) #Calculate advection C2
+    adv_flux_C1 = advection_upwind(C1, U, V, dx, dy) #Calculate advection C1
+    adv_flux_C2 = advection_upwind(C2, U, V,dx,dy) #Calculate advection C2
 
-    diff_flux_C1 = diffusion_flux(C1, K,Nx, Ny) #calculate diffusion C1
-    diff_flux_C2 = diffusion_flux(C2, K, Nx, Ny) #calculate diffusion C2
+    diff_flux_C1 = diffusion_flux(C1, K,dx, dy) #calculate diffusion C1
+    diff_flux_C2 = diffusion_flux(C2, K, dx, dy) #calculate diffusion C2
 
     reaction_C1 = Ar * C1 * C2 #calculate the reaction (relevant only if Ar=!0)
     reaction_C2 = Ar * C1 * C2 #calculate the reaction
@@ -93,5 +100,3 @@ for t in range(timestep):
     #Update C1 and C2
     C1 = C1_new
     C2 = C2_new
-
-
