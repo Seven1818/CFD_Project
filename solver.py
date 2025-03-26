@@ -6,17 +6,16 @@ from velocity import velocity,diffusivity,grid
 #Define functions to discretize the main equations
 #Upwind discretization for advection terms
 
-def advection_upwind (C,U,V,dx,dy):
-    Nx = 100
-    Ny = 100
+def advection_upwind (C,U,V,Nx,Ny):
+
     dx = 1/(Nx-1)
     dy = 1/ (Ny-1)
     #Nx,Ny = C.shape #define grid size, gets it from the size of the input C1/C2
     dCdx = np.zeros_like(C) #derivative in x
     dCdy = np.zeros_like(C) #derivative in y
     #start discretization, go inside the matrix
-    for i in range(0, Nx-1): #goes inside the x coordinate
-        for j in range(0, Ny-1): #goes inside the y coordinate
+    for i in range(1, Nx-1): #goes inside the x coordinate
+        for j in range(1, Ny-1): #goes inside the y coordinate
             # Upwind differencing for x-direction
             if U[i, j] > 0: #case that U is >0 --> backward difference
                 dCdx[i, j] = (C[i, j] - C[i - 1, j]) / dx
@@ -73,12 +72,15 @@ C2 = np.zeros((Nx, Ny))  # Correct
 dt = 0.01
 timestep = 100
 Ar = 0
+
 #Ar = 20 #if reaction is happening
 # Time loop
 for t in range(timestep):
     # 1. Compute fluxes (advection, diffusion, and reaction)
-    adv_flux_C1 = advection_upwind(C1, U, V, Nx, Ny) #Calculate advection C1
-    adv_flux_C2 = advection_upwind(C2, U, V,Nx,Ny) #Calculate advection C2
+    dCdx, dCdy = advection_upwind(C1, U, V, Nx, Ny)
+    adv_flux_C1 = -(U * dCdx + V * dCdy)
+    dCdx, dCdy = advection_upwind(C2, U, V, Nx, Ny)
+    adv_flux_C2 = -(U * dCdx + V * dCdy)
 
     diff_flux_C1 = diffusion_flux(C1, K,Nx, Ny) #calculate diffusion C1
     diff_flux_C2 = diffusion_flux(C2, K, Nx, Ny) #calculate diffusion C2
@@ -103,3 +105,4 @@ for t in range(timestep):
     #Update C1 and C2
     C1 = C1_new
     C2 = C2_new
+
