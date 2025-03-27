@@ -61,7 +61,7 @@ X,Y,x,y = grid(Nx, Ny)
 #Getting U,V and K values
 U,V,e = velocity(X,Y)
 K = diffusivity(X,Y)
-VO = -0.5 #given
+VO = 0.5 #given
 ymp = 0.0  # centerpoint obstacle
 dx = 1 / (Nx - 2)
 dy = 1 / (Ny - 2)
@@ -71,8 +71,8 @@ C1 = np.zeros((Nx, Ny))
 C2 = np.zeros((Nx, Ny))
 
 #Euler foward to calculate the time derivative
-dt = 0.01
-timestep = 100
+dt = 0.0056
+timestep = 500
 Ar = 0
 
 #Ar = 20 #if reaction is happening
