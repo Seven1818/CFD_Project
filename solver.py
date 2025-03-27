@@ -96,19 +96,19 @@ for t in range(timestep):
     C2_new = C2 + dt * (adv_flux_C2 + diff_flux_C2 + reaction_C2) #update C2
 
     # Apply boundary conditions
-    C2_new[0, :] = 0  # West boundary for C2
+    C2_new[0, :] = C2_new[1,:]  # West boundary for C2
     # West Boundary for C1, define Schlichting profile for C1
     for j in range(Ny):
         y[j] = -0.5 + j * dy
         eta = sigma * (y[j] - ymp) / VO
         C1_BC = np.sqrt(1.0 - np.tanh(eta) ** 2)
-        C1_new[0, j] = C1_BC
-    C1_new[Nx-1, :] = C1[Nx-2,:]  # East BC for C1 (zero gradient?)
-    C2_new[Nx-1, :] = C2[Nx-2,:]  # East BC for C2
-    C2_new[:, 0] = -C2[:,-1]  # South boundary for C2
-    C1_new[:, 0] = -C1[:,-1]  # South boundary for C1
-    C1_new[:, Ny-1] = -C1[:,Ny-2] # North boundary for C1
-    C2_new[:, Ny-1] = -C1[:,Ny-2] # North boundary for C2
+        C1_new[0, j] =2 * C1_BC - C1_new[1,j]
+    C1_new[-1, :] = C1[-2,:]  # East BC for C1 (zero gradient!) in case use kinematic BC
+    C2_new[-1, :] = C2[-2,:]  # East BC for C2
+    C2_new[:, 0] = -C2[:,1]  # South boundary for C2
+    C1_new[:, 0] = -C1[:,1]  # South boundary for C1
+    C1_new[:, -1] = -C1[:,-2] # North boundary for C1
+    C2_new[:, -1] = -C1[:,-2] # North boundary for C2
 
     #Update C1 and C2
     C1 = C1_new
