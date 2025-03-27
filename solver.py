@@ -122,3 +122,13 @@ for t in range(timestep):
         plt.pause(0.01)
 plt.show(block=True)
 plt.ioff()
+''' 
+fig = plt.figure(figsize = (12,6))
+ax = fig.add_subplot(121, projection = '3d')
+ax.plot_surface(X,Y,C1, cmap = 'viridis')
+ax.set_title('Concentration C1')
+ax.set_xlabel('X')
+ax.set_ylabel('Y')
+ax.set_zlabel('Concentration C1')
+plt.show()
+'''
