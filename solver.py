@@ -33,8 +33,8 @@ def harmonic_avg(a, b): #Defines harmonic average
     return 2 * a * b / (a + b + 1e-12)  # definition of harmonic average, plus it avoids a division by zero by adding the +1e-12
 
 def diffusion_flux(C, K, dx, dy):
-    Nx = 100
-    Ny = 100
+    Nx = 32
+    Ny = 32
     dx = 1 / (Nx - 2)
     dy = 1 / (Ny - 2)
     diff_flux = np.zeros_like(C) #flux of diffusion, same size as C
@@ -55,8 +55,8 @@ def diffusion_flux(C, K, dx, dy):
 
 #Create Grid
 #define grid size
-Nx= 100
-Ny = 100
+Nx= 32
+Ny = 32
 X,Y,x,y = grid(Nx, Ny)
 #Getting U,V and K values
 U,V,e = velocity(X,Y)
@@ -72,7 +72,7 @@ C2 = np.zeros((Nx, Ny))
 
 #Euler foward to calculate the time derivative
 dt = 0.0056
-timestep = 500
+timestep = 1000
 Ar = 0
 
 #Ar = 20 #if reaction is happening
@@ -116,8 +116,9 @@ for t in range(timestep):
 
     if t % 10 == 0:  # for example, plot every 10 steps
 
-        plt.imshow(C1, origin='lower', cmap='viridis',
-                  extent=[0, 1, -0.5, 0.5], aspect='auto')
+        plt.imshow(C1.T, origin='lower', cmap='viridis',
+            extent=[0, 1, -0.5, 0.5], aspect='auto')
         plt.title(f"Time step {t}")
         plt.pause(0.01)
+plt.show(block=True)
 plt.ioff()
