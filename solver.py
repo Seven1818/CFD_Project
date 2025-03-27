@@ -103,12 +103,12 @@ for t in range(timestep):
         eta = sigma * (y[j] - ymp) / VO
         C1_BC = np.sqrt(1.0 - np.tanh(eta) ** 2)
         C1_new[0, j] = C1_BC
-    C1_new[-1, :] = C1[-2,:]  # East BC for C1 (zero gradient?)
-    C2_new[-1, :] = C2[-2,:]  # East BC for C2
-    C2_new[:, 0] = 0  # South boundary for C2
-    C1_new[:, 0] = 0  # South boundary for C1
-    C1_new[:, 1] = 0 # North boundary for C1
-    C2_new[:, 1] = 0 # North boundary for C2
+    C1_new[Nx-1, :] = C1[Nx-2,:]  # East BC for C1 (zero gradient?)
+    C2_new[Nx-1, :] = C2[Nx-2,:]  # East BC for C2
+    C2_new[:, 0] = -C2[:,-1]  # South boundary for C2
+    C1_new[:, 0] = -C1[:,-1]  # South boundary for C1
+    C1_new[:, Ny-1] = -C1[:,Ny-2] # North boundary for C1
+    C2_new[:, Ny-1] = -C1[:,Ny-2] # North boundary for C2
 
     #Update C1 and C2
     C1 = C1_new
