@@ -5,11 +5,10 @@ from velocity import velocity,diffusivity,grid
 
 #Define functions to discretize the main equations
 #Upwind discretization for advection terms
-
 def advection_upwind (C,U,V,Nx,Ny):
 
-    dx = 1/(Nx-1)
-    dy = 1/ (Ny-1)
+    dx = 1/(Nx-2)
+    dy = 1/ (Ny-2)
     #Nx,Ny = C.shape #define grid size, gets it from the size of the input C1/C2
     dCdx = np.zeros_like(C) #derivative in x
     dCdy = np.zeros_like(C) #derivative in y
@@ -36,8 +35,8 @@ def harmonic_avg(a, b): #Defines harmonic average
 def diffusion_flux(C, K, dx, dy):
     Nx = 100
     Ny = 100
-    dx = 1 / (Nx - 1)
-    dy = 1 / (Ny - 1)
+    dx = 1 / (Nx - 2)
+    dy = 1 / (Ny - 2)
     diff_flux = np.zeros_like(C) #flux of diffusion, same size as C
 
     for i in range(0, Nx-1): #enter the matrix
@@ -62,11 +61,14 @@ X,Y,x,y = grid(Nx, Ny)
 #Getting U,V and K values
 U,V,e = velocity(X,Y)
 K = diffusivity(X,Y)
-
+VO = -0.5 #given
+ymp = 0.0  # centerpoint obstacle
+dx = 1 / (Nx - 2)
+dy = 1 / (Ny - 2)
+sigma = 7.67
 #initialize C1 and C2 fields
-C1 = np.zeros((Nx, Ny))  # Correct
-C2 = np.zeros((Nx, Ny))  # Correct
-
+C1 = np.zeros((Nx, Ny))
+C2 = np.zeros((Nx, Ny))
 
 #Euler foward to calculate the time derivative
 dt = 0.01
@@ -76,9 +78,10 @@ Ar = 0
 #Ar = 20 #if reaction is happening
 # Time loop
 for t in range(timestep):
-    # 1. Compute fluxes (advection, diffusion, and reaction)
-    dCdx, dCdy = advection_upwind(C1, U, V, Nx, Ny)
-    adv_flux_C1 = -(U * dCdx + V * dCdy)
+
+    #Compute fluxes (advection, diffusion, and reaction)
+    dCdx, dCdy = advection_upwind(C1, U, V, Nx, Ny) #get derivative
+    adv_flux_C1 = -(U * dCdx + V * dCdy) #calculate advection term
     dCdx, dCdy = advection_upwind(C2, U, V, Nx, Ny)
     adv_flux_C2 = -(U * dCdx + V * dCdy)
 
@@ -94,15 +97,27 @@ for t in range(timestep):
 
     # Apply boundary conditions
     C2_new[0, :] = 0  # West boundary for C2
-    C1_new[0,:] = 1 # West boundary for C1, missing!!
-    C1[:, -1] = C1[:, -2]  # East BC for C1 (zero gradient?)
-    C2[:, -1] = C2[:, -2]  # East BC for C2
+    # West Boundary for C1, define Schlichting profile for C1
+    for j in range(Ny):
+        y[j] = -0.5 + j * dy
+        eta = sigma * (y[j] - ymp) / VO
+        C1_BC = np.sqrt(1.0 - np.tanh(eta) ** 2)
+        C1_new[0, j] = C1_BC
+    C1_new[-1, :] = C1[-2,:]  # East BC for C1 (zero gradient?)
+    C2_new[-1, :] = C2[-2,:]  # East BC for C2
     C2_new[:, 0] = 0  # South boundary for C2
     C1_new[:, 0] = 0  # South boundary for C1
-    C2_new[:, -1] = 0  # North boundary for C2
-    C1_new[:, -1] = 0  # North boundary for C1
+    C1_new[:, 1] = 0 # North boundary for C1
+    C2_new[:, 1] = 0 # North boundary for C2
 
     #Update C1 and C2
     C1 = C1_new
     C2 = C2_new
 
+    if t % 10 == 0:  # for example, plot every 10 steps
+
+        plt.imshow(C1, origin='lower', cmap='viridis',
+                  extent=[0, 1, -0.5, 0.5], aspect='auto')
+        plt.title(f"Time step {t}")
+        plt.pause(0.01)
+plt.ioff()

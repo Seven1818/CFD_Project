@@ -5,7 +5,7 @@ import numpy as py
 def grid(Nx = 100, Ny = 100, x_range = [0,1], y_range = [-0.5,0.5]):
     x = py.linspace(x_range[0], x_range[1], Nx)#Discretizing the x_range into 100 bits
     y = py.linspace(y_range[0], y_range[1], Ny)#Discretizing the y_range into 100 bits
-    X,Y = py.meshgrid(x,y)#X and Y are 2D arrays representing the grid
+    X,Y = py.meshgrid(x,y,indexing="ij")#X and Y are 2D arrays representing the grid
     return X,Y,x,y
 
 #Calculating Velocity
