@@ -3,8 +3,10 @@ import numpy as py
 
 #defining the grid for the problem 
 def grid(Nx = 100, Ny = 100, x_range = [0,1], y_range = [-0.5,0.5]):
-    x = py.linspace(x_range[0], x_range[1], Nx)#Discretizing the x_range into 100 bits
-    y = py.linspace(y_range[0], y_range[1], Ny)#Discretizing the y_range into 100 bits
+    dx = (x_range[1]-x_range[0])/(Nx-2)
+    dy = (y_range[1]-y_range[0])/(Ny-2)
+    x = py.linspace(x_range[0]-dx/2, x_range[1]+dx/2, Nx)#Discretizing the x_range into 100 bits
+    y = py.linspace(y_range[0]-dy/2, y_range[1]+dy/2, Ny)#Discretizing the y_range into 100 bits
     X,Y = py.meshgrid(x,y, indexing = "ij")#X and Y are 2D arrays representing the grid
     return X,Y,x,y
 
@@ -54,7 +56,7 @@ X,Y,x,y = grid(Nx = 100, Ny = 100)
 U,V,e = velocity(X,Y)
 K = diffusivity(X,Y)
 
-'''#Plotting U 
+#Plotting U 
 fig = plt.figure(figsize = (12,6))
 ax = fig.add_subplot(121, projection = '3d')
 ax.plot_surface(X,Y,U, cmap = 'viridis')
@@ -62,7 +64,7 @@ ax.set_title('Velocity (U) in x-direction')
 ax.set_xlabel('X')
 ax.set_ylabel('Y')
 ax.set_zlabel('Velocity (U)')
-plt.show()'''
+plt.show()
 
 
 
