@@ -71,7 +71,7 @@ C1 = np.zeros((Nx, Ny))
 C2 = np.zeros((Nx, Ny))
 
 #Euler foward to calculate the time derivative
-dt = 0.0056
+dt = 0.0056 #call function here to define stability criterion using the formula on the assignment
 timestep = 1000
 Ar = 0
 
