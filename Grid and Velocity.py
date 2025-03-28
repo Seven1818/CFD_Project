@@ -13,7 +13,7 @@ def grid(Nx = 100, Ny = 100, x_range = [0,1], y_range = [-0.5,0.5]):
 #Calculating Velocity 
 def velocity(X,Y):
     #constants in calculating velocities
-    VO = -0.5#Virtual Origin 
+    VO = 0.5#Virtual Origin 
     s = 7.67#value of sigma (given)
     Uin = 1 #Value of inlet velocity
     SH = 0.01 #Value of slit head at inlet
@@ -34,7 +34,7 @@ def velocity(X,Y):
 #Calculating extra Diffusivity and total diffusivity
 def diffusivity(X,Y):
     e_half = 0.88137#Given value of eta half
-    VO = -0.5#Virtual 
+    VO =  0.5#Virtual 
     xVO = X + VO#using definition of xVO
     s = 7.67#value of sigma (given)
 
