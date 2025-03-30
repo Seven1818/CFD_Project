@@ -53,7 +53,7 @@ def diffusion_flux(C, K, Nx, Ny):
 #define function to calculate stability criterion
 def stability_criterion (U,V,K,dx,dy,Ar,C1,C2):
     cfl = 0.5 # estimated must be lower than 1
-    frac = np.abs(U)/dx + np.abs(V) + K /(dx**2) + K /(dy**2) + Ar * np.max(np.abs(C1),np.abs(C2))
+    frac = np.abs(U)/dx + np.abs(V)/dy + K /(dx**2) + K /(dy**2) + Ar * max(np.max(np.abs(C1)), np.max(np.abs(C2)))
     dt = cfl / (frac + 1e-12)
     return dt
 
@@ -76,8 +76,8 @@ C2 = np.zeros((Nx, Ny))
 residual1 = [] #for plotting residuals
 time_steps = [] #for plotting timesteps
 
-dt = 0.0056 #call function here to define stability criterion using the formula on the assignment
-timestep = 1500 #define number of cycles
+#dt = 0.0056 #call function here to define stability criterion using the formula on the assignment
+timestep = 1000 #define number of cycles
 Ar = 0
 #Ar = 20 #if reaction is happening
 #Euler foward to calculate the time derivative
@@ -95,7 +95,7 @@ for t in range(timestep):
 
     reaction_C1 = Ar * C1 * C2 #calculate the reaction (relevant only if Ar=!0)
     reaction_C2 = Ar * C1 * C2 #calculate the reaction
-
+    dt = stability_criterion(U,V,K,dx,dy,Ar,C1,C2)
     # Euler forward update
     C1_new = C1 + dt * (adv_flux_C1 + diff_flux_C1 + reaction_C1) #update C1
     C2_new = C2 + dt * (adv_flux_C2 + diff_flux_C2 + reaction_C2) #update C2
@@ -114,18 +114,18 @@ for t in range(timestep):
     C1_new[:, 0] = -C1[:,1]  # South boundary for C1
     C1_new[:, -1] = -C1[:,-2] # North boundary for C1
     C2_new[:, -1] = -C1[:,-2] # North boundary for C2
+
     # Calculate relative residuals
     residual_C1 = np.linalg.norm(C1_new - C1) / (np.linalg.norm(C1_new) + 1e-12) #calculate relative residual for C1
     residual_C2 = np.linalg.norm(C2_new - C2) / (np.linalg.norm(C2_new) + 1e-12) #calculate relative residual for C2
     time_steps.append(t) #append values for time steps
     residual1.append(residual_C1) #append values for residuals C1
 
-
     print(f"Time step {t}: residual = {residual_C1:.3e}") # print residuals
     #Update C1 and C2
     C1 = C1_new
     C2 = C2_new
-
+    '''
     if t % 10 == 0:  # plot every 10 seconds
 
         plt.imshow(C1.T, origin='lower', cmap='viridis',
@@ -145,7 +145,7 @@ ax.set_xlabel('X')
 ax.set_ylabel('Y')
 ax.set_zlabel('Concentration C1')
 plt.show()
-'''
+
 #plot residuals over time steps
 plt.figure()
 plt.semilogy(time_steps, residual1, marker='o')
