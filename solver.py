@@ -32,9 +32,7 @@ def advection_upwind (C,U,V,Nx,Ny):
 def harmonic_avg(a, b): #Defines harmonic average
     return 2 * a * b / (a + b + 1e-12)  # definition of harmonic average, plus it avoids a division by zero by adding the +1e-12
 
-def diffusion_flux(C, K, dx, dy):
-    Nx = 32
-    Ny = 32
+def diffusion_flux(C, K, Nx, Ny):
     dx = 1 / (Nx - 2)
     dy = 1 / (Ny - 2)
     diff_flux = np.zeros_like(C) #flux of diffusion, same size as C
@@ -52,6 +50,12 @@ def diffusion_flux(C, K, dx, dy):
             diff_flux[i, j] += (Kn * (C[i, j + 1] - C[i, j]) - Ks * (C[i, j] - C[i, j - 1])) / dy ** 2 #Calculcates the diffusive flux in x
 
     return diff_flux
+#define function to calculate stability criterion
+def stability_criterion (U,V,K,dx,dy,Ar,C1,C2):
+    cfl = 0.5 # estimated must be lower than 1
+    frac = np.abs(U)/dx + np.abs(V) + K /(dx**2) + K /(dy**2) + Ar * np.max(np.abs(C1),np.abs(C2))
+    dt = cfl / (frac + 1e-12)
+    return dt
 
 #Create Grid
 #define grid size
