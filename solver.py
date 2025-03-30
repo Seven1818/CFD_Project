@@ -73,12 +73,13 @@ sigma = 7.67
 #initialize C1 and C2 fields
 C1 = np.zeros((Nx, Ny))
 C2 = np.zeros((Nx, Ny))
+S2 = np.zeros((Nx, Ny)) #source term in C2
 residual1 = [] #for plotting residuals
 time_steps = [] #for plotting timesteps
 
 #dt = 0.0056 #call function here to define stability criterion using the formula on the assignment
 timestep = 1000 #define number of cycles
-Ar = 0
+Ar = 20
 #Ar = 20 #if reaction is happening
 #Euler foward to calculate the time derivative
 # Time loop
@@ -94,11 +95,15 @@ for t in range(timestep):
     diff_flux_C2 = diffusion_flux(C2, K, Nx, Ny) #calculate diffusion C2
 
     reaction_C1 = Ar * C1 * C2 #calculate the reaction (relevant only if Ar=!0)
-    reaction_C2 = Ar * C1 * C2 #calculate the reaction
+    reaction_C2 = -Ar * C1 * C2 #calculate the reaction
     dt = stability_criterion(U,V,K,dx,dy,Ar,C1,C2)
+    for i in range(Nx): #Condition to check if S2 is applicable
+        for j in range(Ny):
+            if 0.8 <= x[i] <= 0.9 and -0.05 <= y[j] <= 0.05:
+                S2[i, j] = 1.0
     # Euler forward update
     C1_new = C1 + dt * (adv_flux_C1 + diff_flux_C1 + reaction_C1) #update C1
-    C2_new = C2 + dt * (adv_flux_C2 + diff_flux_C2 + reaction_C2) #update C2
+    C2_new = C2 + dt * (adv_flux_C2 + diff_flux_C2 + reaction_C2+S2) #update C2
 
     # Apply boundary conditions
     C2_new[0, :] = C2_new[1,:]  # West boundary for C2
