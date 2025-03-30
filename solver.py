@@ -76,13 +76,15 @@ C2 = np.zeros((Nx, Ny))
 S2 = np.zeros((Nx, Ny)) #source term in C2
 residual1 = [] #for plotting residuals
 time_steps = [] #for plotting timesteps
-
+eta_vals = [] #for plotting C1 over eta
+C1_vals = [] #for plotting C1 over eta
 #dt = 0.0056 #call function here to define stability criterion using the formula on the assignment
 timestep = 1000 #define number of cycles
-Ar = 20
+Ar = 0
 #Ar = 20 #if reaction is happening
 plt.ion()  # turn on interactive mode for 2D plot
-fig, ax = plt.subplots() #
+fig, ax = plt.subplots() #plotting
+
 #Euler foward to calculate the time derivative
 # Time loop
 for t in range(timestep):
@@ -113,6 +115,8 @@ for t in range(timestep):
     for j in range(Ny):
         y[j] = -0.5 + j * dy
         eta = sigma * (y[j] - ymp) / VO
+        eta_vals.append(eta)
+        C1_vals.append(C1[Nx-2, j])
         C1_BC = np.sqrt(1.0 - np.tanh(eta) ** 2)
         C1_new[0, j] =2 * C1_BC - C1_new[1,j]
     C1_new[-1, :] = C1[-2,:]  # East BC for C1 (zero gradient!) in case use kinematic BC
@@ -132,7 +136,6 @@ for t in range(timestep):
     #Update C1 and C2
     C1 = C1_new
     C2 = C2_new
-
     if t % 10 == 0:
         ax.clear()  # clear the current axes
         im = ax.imshow(C1.T, origin='lower', cmap='viridis',
@@ -145,9 +148,7 @@ for t in range(timestep):
 plt.ioff()  # turn interactive mode off
 fig.colorbar(im, ax=ax, label='Concentration C1')
 plt.show(block=True)
-#3d plot
 
-plt.ioff()
 #3d plot here
 fig = plt.figure(figsize = (12,6))
 ax = fig.add_subplot(121, projection = '3d')
@@ -165,5 +166,14 @@ plt.semilogy(time_steps, residual1, marker='o')
 plt.xlabel("Time step")
 plt.ylabel("Residual C1")
 plt.title("Relative Residual for C1  vs. Time Step")
+plt.grid(True)
+plt.show()
+
+#plot C1 over eta
+plt.figure()
+plt.plot(eta_vals, C1_vals, marker='o')
+plt.xlabel(r"$\eta$")
+plt.ylabel("C1")
+plt.title("C1 vs. eta close to outlet  (Nx-2)")
 plt.grid(True)
 plt.show()
