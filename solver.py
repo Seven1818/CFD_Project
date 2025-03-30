@@ -81,6 +81,8 @@ time_steps = [] #for plotting timesteps
 timestep = 1000 #define number of cycles
 Ar = 20
 #Ar = 20 #if reaction is happening
+plt.ion()  # turn on interactive mode for 2D plot
+fig, ax = plt.subplots() #
 #Euler foward to calculate the time derivative
 # Time loop
 for t in range(timestep):
@@ -130,25 +132,31 @@ for t in range(timestep):
     #Update C1 and C2
     C1 = C1_new
     C2 = C2_new
-    '''
-    if t % 10 == 0:  # plot every 10 seconds
 
-        plt.imshow(C1.T, origin='lower', cmap='viridis',
-            extent=[0, 1, -0.5, 0.5], aspect='auto')
-        plt.title(f"Time step {t}")
+    if t % 10 == 0:
+        ax.clear()  # clear the current axes
+        im = ax.imshow(C1.T, origin='lower', cmap='viridis',
+                       extent=[0, 1, -0.5, 0.5], aspect='auto')
+        ax.set_title(f"Concentration C1 at time step {t}")
+        ax.set_xlabel("x")
+        ax.set_ylabel("y")
         plt.pause(0.01)
-plt.show(block=True)
-plt.ioff()
 
+plt.ioff()  # turn interactive mode off
+fig.colorbar(im, ax=ax, label='Concentration C1')
+plt.show(block=True)
 #3d plot
-''' 
+
+plt.ioff()
+#3d plot here
 fig = plt.figure(figsize = (12,6))
 ax = fig.add_subplot(121, projection = '3d')
-ax.plot_surface(X,Y,C1, cmap = 'viridis')
+surf = ax.plot_surface(X,Y,C1, cmap = 'viridis')
 ax.set_title('Concentration C1')
 ax.set_xlabel('X')
 ax.set_ylabel('Y')
 ax.set_zlabel('Concentration C1')
+fig.colorbar(surf, ax=ax, shrink=0.5, aspect=10, label='Concentration C1')
 plt.show()
 
 #plot residuals over time steps
