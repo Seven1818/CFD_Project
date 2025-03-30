@@ -69,13 +69,14 @@ sigma = 7.67
 #initialize C1 and C2 fields
 C1 = np.zeros((Nx, Ny))
 C2 = np.zeros((Nx, Ny))
+residual1 = [] #for plotting residuals
+time_steps = [] #for plotting timesteps
 
-#Euler foward to calculate the time derivative
 dt = 0.0056 #call function here to define stability criterion using the formula on the assignment
-timestep = 1000
+timestep = 1500 #define number of cycles
 Ar = 0
-
 #Ar = 20 #if reaction is happening
+#Euler foward to calculate the time derivative
 # Time loop
 for t in range(timestep):
 
@@ -109,12 +110,19 @@ for t in range(timestep):
     C1_new[:, 0] = -C1[:,1]  # South boundary for C1
     C1_new[:, -1] = -C1[:,-2] # North boundary for C1
     C2_new[:, -1] = -C1[:,-2] # North boundary for C2
+    # Calculate relative residuals
+    residual_C1 = np.linalg.norm(C1_new - C1) / (np.linalg.norm(C1_new) + 1e-12) #calculate relative residual for C1
+    residual_C2 = np.linalg.norm(C2_new - C2) / (np.linalg.norm(C2_new) + 1e-12) #calculate relative residual for C2
+    time_steps.append(t) #append values for time steps
+    residual1.append(residual_C1) #append values for residuals C1
 
+
+    print(f"Time step {t}: residual = {residual_C1:.3e}") # print residuals
     #Update C1 and C2
     C1 = C1_new
     C2 = C2_new
 
-    if t % 10 == 0:  # for example, plot every 10 steps
+    if t % 10 == 0:  # plot every 10 seconds
 
         plt.imshow(C1.T, origin='lower', cmap='viridis',
             extent=[0, 1, -0.5, 0.5], aspect='auto')
@@ -122,6 +130,8 @@ for t in range(timestep):
         plt.pause(0.01)
 plt.show(block=True)
 plt.ioff()
+
+#3d plot
 ''' 
 fig = plt.figure(figsize = (12,6))
 ax = fig.add_subplot(121, projection = '3d')
@@ -132,3 +142,11 @@ ax.set_ylabel('Y')
 ax.set_zlabel('Concentration C1')
 plt.show()
 '''
+#plot residuals over time steps
+plt.figure()
+plt.semilogy(time_steps, residual1, marker='o')
+plt.xlabel("Time step")
+plt.ylabel("Residual C1")
+plt.title("Relative Residual for C1  vs. Time Step")
+plt.grid(True)
+plt.show()
