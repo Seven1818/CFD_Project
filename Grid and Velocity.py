@@ -31,23 +31,23 @@ def velocity(X,Y):
 
     return U,V,e #Returning the value of U and V
 
-#Calculating extra Diffusivity and total diffusivity
-def diffusivity(X,Y):
-    e_half = 0.88137#Given value of eta half
-    VO =  0.5#Virtual 
-    xVO = X + VO#using definition of xVO
-    s = 7.67#value of sigma (given)
+def diffusivity(X, Y):
+    e_half = 0.88137  # Given value of eta half
+    VO = 0.5          # Virtual origin
+    xVO = X + VO      # Distance from virtual origin
+    s = 7.67          # Sigma (given)
 
-    b_half = e_half*(xVO)/s#definition of bhalf given
-    U, V, e = velocity(X,Y)#calling velocity U from velocity function
-    Ucl = U/(0.5*(py.clip(1-py.tanh(e)**2,0, None)))#using definition of Ucl = U/f(eta)
-    eps_T = 0.037*b_half*Ucl#Given definition of epsilon
-    K_t = 2*eps_T
-    K_p = 1e-3#Given Value of physical diffusivity in m^2/s
+    b_half = e_half * xVO / s
+    U, V, e = velocity(X, Y)  # Get velocity components and eta
+    Ucl = U / (0.5 * py.clip(1 - py.tanh(e)**2, 1e-6, None))  # Centerline velocity
+    eps_T = 0.037 * b_half * Ucl  # Turbulent diffusivity (momentum)
+    K_t = 2 * eps_T               # Turbulent diffusivity (scalar, factor 2)
+    K_p = 1e-3                    # Physical diffusivity [m²/s]
 
-    #applying condition for k
-    K = py.where(e< 3 * e_half, K_p + K_t, K_p)
+    # Apply sharp cutoff at eta = 3*e_half (no smoothing)
+    K = py.where(py.abs(e) < 3 * e_half, K_p + K_t, K_p)
     return K
+
 
 #Create Grid
 X,Y,x,y = grid(Nx = 100, Ny = 100)
@@ -66,6 +66,24 @@ ax.set_ylabel('Y')
 ax.set_zlabel('Velocity (U)')
 plt.show()
 
+#Plotting V
+fig = plt.figure(figsize = (12,6))
+ax = fig.add_subplot(121, projection = '3d')
+ax.plot_surface(X,Y,V, cmap = 'viridis')
+ax.set_title('Velocity (V) in x-direction')
+ax.set_xlabel('X')
+ax.set_ylabel('Y')
+ax.set_zlabel('Velocity (V)')
+plt.show()
 
+#Plotting Diffusivity 
+fig = plt.figure(figsize = (12,6))
+ax = fig.add_subplot(121, projection = '3d')
+ax.plot_surface(X,Y,K, cmap = 'viridis')
+ax.set_title('Diffusivity')
+ax.set_xlabel('X')
+ax.set_ylabel('Y')
+ax.set_zlabel('Diffusivity(K)')
+plt.show()
 
 
