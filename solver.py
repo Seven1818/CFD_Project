@@ -9,7 +9,6 @@ def advection_upwind (C,U,V,Nx,Ny):
 
     dx = 1/(Nx-2)
     dy = 1/ (Ny-2)
-    #Nx,Ny = C.shape #define grid size, gets it from the size of the input C1/C2
     dCdx = np.zeros_like(C) #derivative in x
     dCdy = np.zeros_like(C) #derivative in y
     #start discretization, go inside the matrix
@@ -78,7 +77,6 @@ residual1 = [] #for plotting residuals
 time_steps = [] #for plotting timesteps
 eta_vals = [] #for plotting C1 over eta
 C1_vals = [] #for plotting C1 over eta
-#dt = 0.0056 #call function here to define stability criterion using the formula on the assignment
 timestep = 1000 #define number of cycles
 Ar = 0
 #Ar = 20 #if reaction is happening
@@ -100,7 +98,7 @@ for t in range(timestep):
 
     reaction_C1 = Ar * C1 * C2 #calculate the reaction (relevant only if Ar=!0)
     reaction_C2 = -Ar * C1 * C2 #calculate the reaction
-    dt = stability_criterion(U,V,K,dx,dy,Ar,C1,C2)
+    dt = stability_criterion(U,V,K,dx,dy,Ar,C1,C2) #calculates the stability criterion
     for i in range(Nx): #Condition to check if S2 is applicable
         for j in range(Ny):
             if 0.8 <= x[i] <= 0.9 and -0.05 <= y[j] <= 0.05:
@@ -111,7 +109,7 @@ for t in range(timestep):
 
     # Apply boundary conditions
     C2_new[0, :] = C2_new[1,:]  # West boundary for C2
-    # West Boundary for C1, define Schlichting profile for C1
+    # West Boundary for C1, Schlichting profile
     for j in range(Ny):
         y[j] = -0.5 + j * dy
         eta = sigma * (y[j] - ymp) / VO
@@ -119,7 +117,7 @@ for t in range(timestep):
         C1_vals.append(C1[Nx-2, j])
         C1_BC = np.sqrt(1.0 - np.tanh(eta) ** 2)
         C1_new[0, j] =2 * C1_BC - C1_new[1,j]
-    C1_new[-1, :] = C1[-2,:]  # East BC for C1 (zero gradient!) in case use kinematic BC
+    C1_new[-1, :] = C1[-2,:]  # East BC for C1 (zero gradient!), kinematic BC would be also possible
     C2_new[-1, :] = C2[-2,:]  # East BC for C2
     C2_new[:, 0] = -C2[:,1]  # South boundary for C2
     C1_new[:, 0] = -C1[:,1]  # South boundary for C1
