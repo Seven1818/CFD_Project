@@ -1,2 +1,2 @@
 # CFD_Project
-CFD  project
+CFD group assignment on building a 2D diffusion solver
